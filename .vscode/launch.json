@@ -4,8 +4,8 @@
         {
             "type": "cppdbg",
             "request": "launch",
-            "name": "Launch Program",
-            "program": "${workspaceFolder}/data_loader",
+            "name": "Launch GNB Predictor",
+            "program": "${workspaceFolder}/gnb_predictor",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
