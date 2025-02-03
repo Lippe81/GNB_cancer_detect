@@ -2,48 +2,29 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "name": "Launch GNB Predictor",
-            "program": "E:/Codes/GNB_cancer_detect/gnb_predictor",
+            "program": "${workspaceFolder}/gnb_predictor",  // Path to your executable
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}",  // Working directory
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
+            "miDebuggerPath": "E:/msys64/usr/bin/gdb.exe",  // Correct path to GDB
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",
                     "text": "-enable-pretty-printing",
                     "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
                 }
-            ],
-            "preLaunchTask": "build",
-            "miDebuggerPath": "/usr/bin/gdb",
-            "miDebuggerArgs": "",
-            "logging": {
-                "moduleLoad": false,
-                "programOutput": true,
-                "trace": false,
-                "engineLogging": false
-            },
-            "debugServerPath": "",
-            "debugServerArgs": "",
-            "serverStarted": "",
-            "filterStdout": true,
-            "filterStderr": false,
-            "targetArchitecture": "x64",
-            "sourceFileMap": {
-                "/mnt/c": "c:\\"
-            },
-            "pipeTransport": {
-                "pipeCwd": "",
-                "pipeProgram": "e:/Git/bin/bash.exe",
-                "pipeArgs": ["-c"],
-                "debuggerPath": "e:/msys64/usr/bin/gdb"
-            },
-            "showDisplayString": true
+            ]
         }
     ]
 }

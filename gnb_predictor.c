@@ -9,6 +9,7 @@
 
 #define MAX_LINE_LENGTH 1024
 #define MAX_FEATURES 30
+#define EPSILON 1e-9  // To prevent zero variance
 
 typedef struct {
     double mean;
@@ -31,30 +32,23 @@ void calculate_mean_variance(double *data, int n, GaussianParams *params) {
     for (int i = 0; i < n; i++) {
         variance_sum += pow(data[i] - params->mean, 2);
     }
-    params->variance = variance_sum / n;
+    params->variance = variance_sum / n + EPSILON;  // Add epsilon to avoid zero variance
 }
 
 double gaussian_probability(double x, GaussianParams *params) {
-    double exponent = exp(-pow(x - params->mean, 2) / (2 * params->variance));
-    return (1 / sqrt(2 * M_PI * params->variance)) * exponent;
+    double variance = params->variance;
+    double exponent = exp(-pow(x - params->mean, 2) / (2 * variance));
+    return (1.0 / sqrt(2 * M_PI * variance)) * exponent;
 }
 
 void train_gnb(double **X, char *y, int n_samples, int n_features, ClassParams *class_M, ClassParams *class_B) {
     int count_M = 0, count_B = 0;
-    double *sum_M = calloc(n_features, sizeof(double));
-    double *sum_B = calloc(n_features, sizeof(double));
 
     for (int i = 0; i < n_samples; i++) {
         if (y[i] == 'M') {
             count_M++;
-            for (int j = 0; j < n_features; j++) {
-                sum_M[j] += X[i][j];
-            }
         } else {
             count_B++;
-            for (int j = 0; j < n_features; j++) {
-                sum_B[j] += X[i][j];
-            }
         }
     }
 
@@ -80,9 +74,6 @@ void train_gnb(double **X, char *y, int n_samples, int n_features, ClassParams *
         free(data_M);
         free(data_B);
     }
-
-    free(sum_M);
-    free(sum_B);
 }
 
 char predict_gnb(double *x, int n_features, ClassParams *class_M, ClassParams *class_B) {
@@ -90,8 +81,10 @@ char predict_gnb(double *x, int n_features, ClassParams *class_M, ClassParams *c
     double log_prob_B = log(class_B->prior);
 
     for (int j = 0; j < n_features; j++) {
-        log_prob_M += log(gaussian_probability(x[j], &class_M->features[j]));
-        log_prob_B += log(gaussian_probability(x[j], &class_B->features[j]));
+        double prob_M = gaussian_probability(x[j], &class_M->features[j]);
+        double prob_B = gaussian_probability(x[j], &class_B->features[j]);
+        log_prob_M += log(prob_M + EPSILON);  // Avoid log(0)
+        log_prob_B += log(prob_B + EPSILON);
     }
 
     return log_prob_M > log_prob_B ? 'M' : 'B';
@@ -108,37 +101,45 @@ void read_csv(const char *filename, double ***X, char **y, int *n_samples, int *
     int sample_count = 0;
     int feature_count = 0;
 
-    while (fgets(line, sizeof(line), file)) {
-        if (sample_count == 0) {
-            char *token = strtok(line, ",");
-            while (token != NULL) {
-                feature_count++;
-                token = strtok(NULL, ",");
-            }
-            feature_count--; // Exclude the label column
+    // Read header to determine feature count
+    if (fgets(line, sizeof(line), file)) {
+        char *token = strtok(line, ",");
+        while (token != NULL) {
+            feature_count++;
+            token = strtok(NULL, ",");
         }
-        sample_count++;
+        *n_features = feature_count - 2;  // Exclude id and diagnosis columns
     }
 
-    *n_samples = sample_count - 1; // Exclude the header row
-    *n_features = feature_count;
+    // Count number of samples (excluding header)
+    while (fgets(line, sizeof(line), file)) {
+        sample_count++;
+    }
+    *n_samples = sample_count;
 
+    // Allocate memory
     *X = malloc(*n_samples * sizeof(double *));
     *y = malloc(*n_samples * sizeof(char));
 
+    // Reset file pointer to read data
     fseek(file, 0, SEEK_SET);
-    fgets(line, sizeof(line), file); // Skip header row
+    fgets(line, sizeof(line), file);  // Skip header
 
     int sample_idx = 0;
     while (fgets(line, sizeof(line), file)) {
         (*X)[sample_idx] = malloc(*n_features * sizeof(double));
-        char *token = strtok(line, ",");
+        char *token = strtok(line, ",");  // Skip id
+        token = strtok(NULL, ",");        // Get diagnosis
         (*y)[sample_idx] = token[0];
-        token = strtok(NULL, ",");
 
+        // Read features
         for (int j = 0; j < *n_features; j++) {
-            (*X)[sample_idx][j] = atof(token);
             token = strtok(NULL, ",");
+            if (token == NULL) {
+                fprintf(stderr, "Error reading features for sample %d\n", sample_idx);
+                exit(EXIT_FAILURE);
+            }
+            (*X)[sample_idx][j] = atof(token);
         }
         sample_idx++;
     }
@@ -157,9 +158,9 @@ void evaluate_model(double **X, char *y, int n_samples, int n_features, ClassPar
     }
 
     double accuracy = (double)(tp + tn) / n_samples;
-    double precision = (double)tp / (tp + fp);
-    double recall = (double)tp / (tp + fn);
-    double f1_score = 2 * (precision * recall) / (precision + recall);
+    double precision = (tp + fp) > 0 ? (double)tp / (tp + fp) : 0;
+    double recall = (tp + fn) > 0 ? (double)tp / (tp + fn) : 0;
+    double f1_score = (precision + recall) > 0 ? 2 * (precision * recall) / (precision + recall) : 0;
     double error = 1 - accuracy;
 
     printf("Confusion Matrix:\n");
@@ -172,10 +173,17 @@ void evaluate_model(double **X, char *y, int n_samples, int n_features, ClassPar
 }
 
 int main() {
-    const char *csv_filename = "breast-cancer.csv";
+    const char *csv_filename = "breast_cancer.csv";
     double **X;
     char *y;
     int n_samples, n_features;
+
+    FILE *file = fopen(csv_filename, "r");
+    if (file == NULL) {
+        fprintf(stderr, "Failed to open file: %s\n", csv_filename);
+        return EXIT_FAILURE;
+    }
+    fclose(file);
 
     read_csv(csv_filename, &X, &y, &n_samples, &n_features);
 
