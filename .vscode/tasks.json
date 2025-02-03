@@ -15,7 +15,12 @@
             "presentation": {
                 "reveal": "silent"
             },
-            "problemMatcher": ["$gcc"]
+            "problemMatcher": ["$gcc"],
+            "options": {
+                "env": {
+                    "PATH": "${env:PATH};C:\\ProgramData\\chocolatey\\bin;E:\\msys64\\ucrt64\\bin"
+                }
+            }
         }
     ]
 }

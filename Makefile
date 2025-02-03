@@ -1,6 +1,6 @@
 CC = gcc
-CFLAGS = -Wall -IC:/path/to/vcpkg/installed/x64-windows/include
-LDFLAGS = -LC:/path/to/vcpkg/installed/x64-windows/lib -lgsl -lgslcblas -lm
+CFLAGS = -Wall
+LDFLAGS = -lm
 
 all: gnb_predictor
 

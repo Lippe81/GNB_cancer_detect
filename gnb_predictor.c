@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <gsl/gsl_statistics.h>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -22,8 +21,17 @@ typedef struct {
 } ClassParams;
 
 void calculate_mean_variance(double *data, int n, GaussianParams *params) {
-    params->mean = gsl_stats_mean(data, 1, n);
-    params->variance = gsl_stats_variance(data, 1, n);
+    double sum = 0.0;
+    for (int i = 0; i < n; i++) {
+        sum += data[i];
+    }
+    params->mean = sum / n;
+
+    double variance_sum = 0.0;
+    for (int i = 0; i < n; i++) {
+        variance_sum += pow(data[i] - params->mean, 2);
+    }
+    params->variance = variance_sum / n;
 }
 
 double gaussian_probability(double x, GaussianParams *params) {
@@ -151,7 +159,7 @@ void evaluate_model(double **X, char *y, int n_samples, int n_features, ClassPar
     double accuracy = (double)(tp + tn) / n_samples;
     double precision = (double)tp / (tp + fp);
     double recall = (double)tp / (tp + fn);
-    double f1_score = 2 * (precision * recall) / (precision * recall);
+    double f1_score = 2 * (precision * recall) / (precision + recall);
     double error = 1 - accuracy;
 
     printf("Confusion Matrix:\n");

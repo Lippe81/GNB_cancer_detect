@@ -3,8 +3,7 @@
         {
             "name": "Win32",
             "includePath": [
-                "${workspaceFolder}/**",
-                "${workspaceFolder}/vcpkg/installed/x64-windows/include"
+                "${workspaceFolder}/**"
             ],
             "defines": [
                 "_DEBUG",
@@ -15,8 +14,7 @@
             "intelliSenseMode": "windows-msvc-x64",
             "browse": {
                 "path": [
-                    "${workspaceFolder}",
-                    "${workspaceFolder}/vcpkg/installed/x64-windows/include"
+                    "${workspaceFolder}"
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""

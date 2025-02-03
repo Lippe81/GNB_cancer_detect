@@ -5,7 +5,7 @@
             "type": "cppdbg",
             "request": "launch",
             "name": "Launch GNB Predictor",
-            "program": "${workspaceFolder}/gnb_predictor",
+            "program": "E:/Codes/GNB_cancer_detect/gnb_predictor",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -39,9 +39,9 @@
             },
             "pipeTransport": {
                 "pipeCwd": "",
-                "pipeProgram": "bash",
+                "pipeProgram": "e:/Git/bin/bash.exe",
                 "pipeArgs": ["-c"],
-                "debuggerPath": "/usr/bin/gdb"
+                "debuggerPath": "e:/msys64/usr/bin/gdb"
             },
             "showDisplayString": true
         }
