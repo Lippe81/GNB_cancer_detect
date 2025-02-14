@@ -72,3 +72,33 @@ int predict_gnb(const GNBModel *model, const double *sample) {
 
     return (log_probs[1] > log_probs[0]) ? 1 : 0;
 }
+
+// Get class probabilities for all samples in the dataset
+double **get_gnb_probs(const GNBModel *model, const Dataset *data) {
+    double **probs = malloc(data->n_samples * sizeof(double *));
+    for (int i = 0; i < data->n_samples; i++) {
+        probs[i] = malloc(2 * sizeof(double)); // 2 classes: B (0) and M (1)
+
+        // Compute log probabilities for each class
+        double log_probs[2] = {log(model->prior[0]), log(model->prior[1])};
+        for (int c = 0; c < 2; c++) {
+            for (int f = 0; f < model->n_features; f++) {
+                double x = data->features[i][f];
+                double mean = model->mean[c][f];
+                double var = model->variance[c][f];
+                log_probs[c] += log(gaussian_pdf(x, mean, var));
+            }
+        }
+
+        // Convert log probabilities to probabilities
+        double max_log_prob = (log_probs[0] > log_probs[1]) ? log_probs[0] : log_probs[1];
+        probs[i][0] = exp(log_probs[0] - max_log_prob);
+        probs[i][1] = exp(log_probs[1] - max_log_prob);
+
+        // Normalize probabilities
+        double sum = probs[i][0] + probs[i][1];
+        probs[i][0] /= sum;
+        probs[i][1] /= sum;
+    }
+    return probs;
+}

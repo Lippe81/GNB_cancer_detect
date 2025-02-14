@@ -44,7 +44,6 @@ void load_csv(const char *filename, Dataset *data) {
 
         // Split line into tokens
         char *token = strtok(line, ",");
-        int col_idx = 0;
 
         // Skip the first column (ID)
         token = strtok(NULL, ",");

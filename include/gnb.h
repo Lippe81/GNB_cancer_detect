@@ -12,5 +12,6 @@ typedef struct {
 
 void train_gnb(const Dataset *train_data, GNBModel *model);
 int predict_gnb(const GNBModel *model, const double *sample);
+double **get_gnb_probs(const GNBModel *model, const Dataset *data); // Add this line
 
 #endif // GNB_H

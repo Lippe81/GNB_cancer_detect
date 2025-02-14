@@ -14,5 +14,6 @@ typedef struct {
 void train_kde_nb(const Dataset *train_data, KDEModel *model);
 int predict_kde_nb(const KDEModel *model, const double *sample);
 void free_kde_model(KDEModel *model);
+double **get_kde_probs(const KDEModel *model, const Dataset *data); // Add this line
 
 #endif // KDE_NB_H

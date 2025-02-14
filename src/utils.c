@@ -37,3 +37,11 @@ void *safe_malloc(size_t size) {
     }
     return ptr;
 }
+
+// Free 2D array of doubles
+void free_2d_array(double **array, int n_rows) {
+    for (int i = 0; i < n_rows; i++) {
+        free(array[i]); // Free each row
+    }
+    free(array); // Free the array of pointers
+}

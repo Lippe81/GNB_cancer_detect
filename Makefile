@@ -1,14 +1,30 @@
+# Compiler and flags
 CC = gcc
-CFLAGS = -Wall
+CFLAGS = -Wall -g -I./include  # Added -g for debugging and include directory
 LDFLAGS = -lm
 
-all: gnb_predictor
+# Source and object files
+SRC_DIR = src
+SRC = $(wildcard $(SRC_DIR)/*.c)
+OBJ = $(SRC:.c=.o)
 
-gnb_predictor: gnb_predictor.o
-	$(CC) -o gnb_predictor gnb_predictor.o $(LDFLAGS)
+# Output executable
+TARGET = bin/main.exe
 
-gnb_predictor.o: gnb_predictor.c
-	$(CC) $(CFLAGS) -c gnb_predictor.c
+# Default target
+all: $(TARGET)
 
+# Link object files to create the executable
+$(TARGET): $(OBJ)
+	@mkdir -p bin  # Ensure the bin directory exists
+	$(CC) -o $@ $^ $(LDFLAGS)
+
+# Compile source files into object files
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Clean up build artifacts
 clean:
-	rm -f gnb_predictor gnb_predictor.o
+	rm -f $(OBJ) $(TARGET)
+
+.PHONY: all clean

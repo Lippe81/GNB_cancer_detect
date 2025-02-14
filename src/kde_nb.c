@@ -100,3 +100,43 @@ void free_kde_model(KDEModel *model) {
     free(model->samples);
     free(model->bandwidth);
 }
+
+// Get class probabilities for all samples in the dataset
+double **get_kde_probs(const KDEModel *model, const Dataset *data) {
+    double **probs = malloc(data->n_samples * sizeof(double *));
+    for (int i = 0; i < data->n_samples; i++) {
+        probs[i] = malloc(2 * sizeof(double)); // 2 classes: B (0) and M (1)
+
+        // Compute log probabilities for each class
+        double log_probs[2] = {log(model->prior[0]), log(model->prior[1])};
+        for (int c = 0; c < 2; c++) {
+            for (int f = 0; f < model->n_features; f++) {
+                double x = data->features[i][f];
+                double h = model->bandwidth[c][f];
+                double sum = 0.0;
+
+                // Compute KDE for this feature and class
+                for (int k = 0; k < model->class_counts[c]; k++) {
+                    double diff = x - model->samples[c][f][k];
+                    double u = diff / h;
+                    sum += exp(-0.5 * u * u);
+                }
+
+                // Compute KDE and avoid log(0)
+                double kde = sum / (model->class_counts[c] * h * sqrt(2 * M_PI));
+                log_probs[c] += log(kde + 1e-9);
+            }
+        }
+
+        // Convert log probabilities to probabilities
+        double max_log_prob = (log_probs[0] > log_probs[1]) ? log_probs[0] : log_probs[1];
+        probs[i][0] = exp(log_probs[0] - max_log_prob);
+        probs[i][1] = exp(log_probs[1] - max_log_prob);
+
+        // Normalize probabilities
+        double sum = probs[i][0] + probs[i][1];
+        probs[i][0] /= sum;
+        probs[i][1] /= sum;
+    }
+    return probs;
+}

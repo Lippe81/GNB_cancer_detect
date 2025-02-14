@@ -1,14 +1,18 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include "data_loader.h"
 #include "preprocessing.h"
 #include "gnb.h"
 #include "kde_nb.h"
 #include "stacking.h"
 #include "evaluation.h"
+#include "utils.h" 
+
 
 int main() {
     // Load and preprocess data
     Dataset data, train, test;
-    load_csv("breast-cancer.csv", &data);
+    load_csv("data/breast-cancer.csv", &data);
     train_test_split(&data, &train, &test, 0.3);
     normalize(&train, &test);
 
@@ -20,9 +24,9 @@ int main() {
 
     // Generate base model probabilities for stacking
     StackedFeatures sf = init_stacked_features(test.n_samples, 2);
-    double **gnb_probs = get_gnb_probs(&gnb_model, &test); // Implement this
+    double **gnb_probs = get_gnb_probs(&gnb_model, &test);
     add_base_model_probs(&sf, gnb_probs, 2);
-    double **kde_probs = get_kde_probs(&kde_model, &test); // Implement this
+    double **kde_probs = get_kde_probs(&kde_model, &test); // Use the new function
     add_base_model_probs(&sf, kde_probs, 2);
 
     // Train meta-model
@@ -39,6 +43,8 @@ int main() {
     free_stacked_features(&sf);
     free_logistic_model(&meta_model);
     free(final_preds);
+    free_2d_array(gnb_probs, test.n_samples);
+    free_2d_array(kde_probs, test.n_samples); // Free KDE probabilities
     free_dataset(&data);
     free_dataset(&train);
     free_dataset(&test);

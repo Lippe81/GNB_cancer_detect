@@ -20,4 +20,7 @@ void shuffle(int *array, int n);
 // Safe memory allocation with error checking
 void *safe_malloc(size_t size);
 
+// Free 2D array of doubles
+void free_2d_array(double **array, int n_rows);
+
 #endif // UTILS_H

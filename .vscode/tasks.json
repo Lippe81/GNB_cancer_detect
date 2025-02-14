@@ -1,26 +1,32 @@
 {
-    // See https://go.microsoft.com/fwlink/?LinkId=733558
-    // for the documentation about the tasks.json format
     "version": "2.0.0",
     "tasks": [
         {
             "label": "build",
             "type": "shell",
-            "command": "make",
-            "args": [],
+            "command": "gcc",
+            "args": [
+                "-Wall",
+                "-g",
+                "-Iinclude",
+                "src/main.c",
+                "src/data_loader.c",
+                "src/preprocessing.c",
+                "src/gnb.c",
+                "src/kde_nb.c",
+                "src/stacking.c",
+                "src/evaluation.c",
+                "src/utils.c",
+                "-o",
+                "bin/main.exe",
+                "-lm"
+            ],
             "group": {
                 "kind": "build",
                 "isDefault": true
             },
-            "presentation": {
-                "reveal": "silent"
-            },
             "problemMatcher": ["$gcc"],
-            "options": {
-                "env": {
-                    "PATH": "${env:PATH};C:\\ProgramData\\chocolatey\\bin;E:\\msys64\\ucrt64\\bin"
-                }
-            }
+            "detail": "Compile all source files"
         }
     ]
 }
