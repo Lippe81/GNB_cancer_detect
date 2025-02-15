@@ -2,30 +2,29 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug C Program",
+            "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/bin/main.exe", // Correct executable path
+            "program": "${workspaceFolder}/bin/main.exe",  // Path to your executable
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}",  // Working directory
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
-            "miDebuggerPath": "E:/msys64/usr/bin/gdb.exe", // Verify this path!
+            "miDebuggerPath": "E:/msys64/usr/bin/gdb.exe",  // Correct path to GDB
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",
                     "text": "-enable-pretty-printing",
                     "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
                 }
-            ],
-            "preLaunchTask": "build", // Must match the task label in tasks.json
-            "logging": {
-                "trace": true, // Enable detailed logs
-                "traceResponse": true,
-                "engineLogging": true
-            }
+            ]
         }
     ]
 }

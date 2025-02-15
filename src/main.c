@@ -36,8 +36,13 @@ int main() {
     // Evaluate
     int *final_preds = predict_stacking(&meta_model, &sf);
     ConfusionMatrix cm = compute_confusion_matrix(test.labels, final_preds, test.n_samples);
+    printf("Confusion Matrix:\n");
+    printf("TP: %d, TN: %d, FP: %d, FN: %d\n", cm.tp, cm.tn, cm.fp, cm.fn);
     printf("Accuracy: %.2f%%\n", accuracy(&cm) * 100);
+    printf("Precision: %.2f%%\n", precision(&cm) * 100);
+    printf("Recall: %.2f%%\n", recall(&cm) * 100);
     printf("F1 Score: %.2f%%\n", f1_score(&cm) * 100);
+    printf("Prediction Error: %.2f%%\n", (1 - accuracy(&cm)) * 100);
 
     // Cleanup
     free_stacked_features(&sf);
