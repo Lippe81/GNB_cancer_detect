@@ -14,7 +14,7 @@ int main() {
     // Load and preprocess data
     Dataset data, train, test;
     load_csv("data/breast-cancer.csv", &data);
-    train_test_split(&data, &train, &test, 0.3);
+    train_test_split(&data, &train, &test, 0.2);
     normalize(&train, &test);
 
     // Train base models
